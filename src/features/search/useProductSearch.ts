@@ -4,6 +4,17 @@ import { searchProducts, type Product } from './api';
 
 export type SearchStatus = 'idle' | 'loading' | 'success' | 'error';
 
+// Module-level cache of successful results, keyed by query. It outlives individual
+// mounts, so a repeated query (even after navigating away and back) is served
+// instantly with no second request. Only successes are cached, so a failed query
+// still retries.
+const resultCache = new Map<string, Product[]>();
+
+/** Test helper — reset the shared cache between cases. */
+export function clearSearchCache(): void {
+  resultCache.clear();
+}
+
 export interface ProductSearch {
   query: string;
   setQuery: (query: string) => void;
@@ -39,6 +50,15 @@ export function useProductSearch(delayMs = 400): ProductSearch {
       return;
     }
 
+    // Serve a previously-seen query from cache — no network, no loading flash.
+    const cached = resultCache.get(debouncedQuery);
+    if (cached) {
+      setResults(cached);
+      setStatus('success');
+      setError(null);
+      return;
+    }
+
     const controller = new AbortController();
     let active = true;
     setStatus('loading');
@@ -46,6 +66,7 @@ export function useProductSearch(delayMs = 400): ProductSearch {
 
     searchProducts(debouncedQuery, controller.signal)
       .then((products) => {
+        resultCache.set(debouncedQuery, products);
         if (!active) return;
         setResults(products);
         setStatus('success');
