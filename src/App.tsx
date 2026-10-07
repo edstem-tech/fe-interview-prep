@@ -10,7 +10,8 @@ export default function App() {
       <Route element={<Layout />}>
         <Route index element={<Home />} />
         {features.map((feature) => (
-          <Route key={feature.id} path={feature.path} element={<feature.Component />} />
+          // `/*` lets a feature declare its own nested routes (e.g. Q5's login/admin).
+          <Route key={feature.id} path={`${feature.path}/*`} element={<feature.Component />} />
         ))}
         <Route path="*" element={<NotFound />} />
       </Route>
