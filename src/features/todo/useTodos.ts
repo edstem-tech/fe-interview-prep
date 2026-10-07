@@ -1,6 +1,11 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useLocalStorage } from '../../lib/useLocalStorage';
-import type { Filter, Todo } from './types';
+import { FILTERS, type Filter, type Todo } from './types';
+
+function parseFilter(value: string | null): Filter {
+  return (FILTERS as readonly string[]).includes(value ?? '') ? (value as Filter) : 'all';
+}
 
 let idCounter = 0;
 function createId(): string {
@@ -14,22 +19,43 @@ export interface TodosApi {
   filter: Filter;
   remaining: number;
   hasCompleted: boolean;
+  /** Reordering is only meaningful on the unfiltered list. */
+  canReorder: boolean;
   setFilter: (filter: Filter) => void;
   add: (title: string) => void;
   edit: (id: string, title: string) => void;
   toggle: (id: string) => void;
   remove: (id: string) => void;
+  move: (fromIndex: number, toIndex: number) => void;
   clearCompleted: () => void;
 }
 
 /**
- * Owns the todo list and the active filter. Both are persisted to localStorage so
- * they survive a refresh (per the spec). Derived values (`visible`, `remaining`)
- * are memoised so the list only recomputes when todos or the filter change.
+ * Owns the todo list and the active filter. The list is persisted to localStorage;
+ * the filter lives in the URL query string (`?filter=active`), so it survives a
+ * refresh *and* is shareable/back-forward friendly. Derived values (`visible`,
+ * `remaining`) are memoised so the list only recomputes when todos or the filter
+ * change.
  */
 export function useTodos(keyPrefix = 'q1'): TodosApi {
   const [todos, setTodos] = useLocalStorage<Todo[]>(`${keyPrefix}.todos`, []);
-  const [filter, setFilter] = useLocalStorage<Filter>(`${keyPrefix}.filter`, 'all');
+  const [params, setParams] = useSearchParams();
+  const filter = parseFilter(params.get('filter'));
+
+  const setFilter = useCallback(
+    (next: Filter) => {
+      setParams(
+        (prev) => {
+          const search = new URLSearchParams(prev);
+          if (next === 'all') search.delete('filter');
+          else search.set('filter', next);
+          return search;
+        },
+        { replace: true },
+      );
+    },
+    [setParams],
+  );
 
   const visible = useMemo(() => {
     switch (filter) {
@@ -77,17 +103,33 @@ export function useTodos(keyPrefix = 'q1'): TodosApi {
     setTodos((prev) => prev.filter((todo) => !todo.completed));
   }
 
+  function move(fromIndex: number, toIndex: number): void {
+    if (fromIndex === toIndex) return;
+    setTodos((prev) => {
+      if (fromIndex < 0 || toIndex < 0 || fromIndex >= prev.length || toIndex >= prev.length) {
+        return prev;
+      }
+      const next = [...prev];
+      const [moved] = next.splice(fromIndex, 1);
+      if (!moved) return prev;
+      next.splice(toIndex, 0, moved);
+      return next;
+    });
+  }
+
   return {
     todos,
     visible,
     filter,
     remaining,
     hasCompleted,
+    canReorder: filter === 'all',
     setFilter,
     add,
     edit,
     toggle,
     remove,
+    move,
     clearCompleted,
   };
 }
