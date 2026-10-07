@@ -3,6 +3,7 @@ import { todoFeature } from './todo';
 import { searchFeature } from './search';
 import { wizardFeature } from './wizard';
 import { tableFeature } from './table';
+import { authFeature } from './auth';
 
 /**
  * The ordered list of interview features. Each feature branch (Q1..Q5) appends
@@ -14,4 +15,5 @@ export const features: Feature[] = [
   searchFeature,
   wizardFeature,
   tableFeature,
+  authFeature,
 ];
