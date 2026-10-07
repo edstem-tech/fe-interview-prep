@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
+import SessionTools from './SessionTools';
 
 interface FromState {
   from?: string;
@@ -109,6 +110,8 @@ export default function LoginPage() {
           </button>
         </div>
       </div>
+
+      <SessionTools />
     </section>
   );
 }
