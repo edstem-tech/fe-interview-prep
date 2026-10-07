@@ -42,14 +42,16 @@ cards are generated from — so a feature is wired in by appending one entry.
 
 ## Features
 
-| # | Question | Route | PR |
-| --- | --- | --- | --- |
-| 1 | Todo App | `/todo` | _pending_ |
-| 2 | Live Search | `/search` | _pending_ |
-| 3 | Registration Wizard | `/wizard` | _pending_ |
-| 4 | Data Table | `/data-table` | _pending_ |
-| 5 | Login & Session Handling | `/auth` | _pending_ |
+| # | Question | Route | What it shows | PR |
+| --- | --- | --- | --- | --- |
+| 1 | Todo App | `/todo` | Add/edit/complete/delete, filters, items-left, clear-completed; todos **and** filter persisted. Reusable `useLocalStorage`. | [#2](https://github.com/edstem-tech/fe-interview-prep/pull/2) |
+| 2 | Live Search | `/search` | Debounced API search with abort + out-of-order-response guard; loading/error/empty/results; match highlighting. | [#3](https://github.com/edstem-tech/fe-interview-prep/pull/3) |
+| 3 | Registration Wizard | `/wizard` | 3 steps, gated validation (India 6-digit postal), review with per-step edit, progress bar, refresh-safe progress. | [#4](https://github.com/edstem-tech/fe-interview-prep/pull/4) |
+| 4 | Data Table | `/data-table` | Reusable generic table (no library): sort cycle, global search + column filter, paging; whole view shareable via URL. | [#5](https://github.com/edstem-tech/fe-interview-prep/pull/5) |
+| 5 | Login & Session | `/auth` | Protected + admin routes, 30s access token, silent **single-flight** refresh, logout on refresh fail, no-flash restore. | [#6](https://github.com/edstem-tech/fe-interview-prep/pull/6) |
+
+Screenshots for each live in [`docs/screenshots/`](docs/screenshots).
 
 ## Walkthrough video
 
-_Link added after the final merge._
+📺 _Add the 2-minute YouTube walkthrough link here after recording._
